@@ -1,12 +1,13 @@
 import nltk
-nltk.download('wordnet')
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
+from nltk import word_tokenize, pos_tag
 
-sentence = "the sun is shining brightly,I love reading interesting books."
-tokens = nltk.word_tokenize(sentence)
+sentences = [
+    "Good Morning students",
+    "Pay attention please",
+    "He is the founder of our university"
+]
 
-for token in tokens:
-    pos_tag = nltk.pos_tag([token])[0][1]
-    lemmatized_word = nltk.WordNetLemmatizer().lemmatize(token)
-    print(f"org: {token}, pos={pos_tag}, Lemma={lemmatized_word}")
+for sentence in sentences:
+    tokens = word_tokenize(sentence)
+    tagged = pos_tag(tokens)
+    print(tagged)
