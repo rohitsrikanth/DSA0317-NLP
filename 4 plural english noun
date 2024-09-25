@@ -1,20 +1,42 @@
-import nltk
-nltk.download('averaged_perceptron_tagger')
-from nltk import pos_tag, word_tokenize
-def identify_nouns(sentence):
-    words = word_tokenize(sentence)
-    tagged_words = pos_tag(words)
-    print(tagged_words)
-    nouns = [word for word, pos in tagged_words if pos.startswith('NN')]
-    return nouns
-sentence = "The quick brown fox jumps over the lazy dog."
-nouns = identify_nouns(sentence)
-if nouns:
-    print("Nouns identified in the sentence:")
-    for noun in nouns:
-        if noun[-1].lower() in {'s', 'x', 'z'} or noun[-2:].lower() in {'ch', 'sh'}:
-            print(noun+"es")
+class FiniteStateMachine:
+    def _init_(self):
+        self.states = ['START', 'ADD_S', 'ADD_ES', 'CHANGE_Y_TO_IES', 'FINAL']
+        self.current_state = 'START'
+        
+    def transition(self, word):
+        """
+        Transitions between states based on the last characters of the word.
+        """
+        if word.endswith(('s', 'x', 'z', 'ch', 'sh')):
+            self.current_state = 'ADD_ES'
+        elif word.endswith('y') and word[-2] not in 'aeiou':
+            self.current_state = 'CHANGE_Y_TO_IES'
         else:
-            print(noun+"s")
-else:
-    print("No nouns found in the sentence.")
+            self.current_state = 'ADD_S'
+    
+    def pluralize(self, word):
+        """
+        Generates the plural form of a given English noun using FSM.
+        """
+        self.transition(word)
+        if self.current_state == 'ADD_S':
+            plural = word + 's'
+        elif self.current_state == 'ADD_ES':
+            plural = word + 'es'
+        elif self.current_state == 'CHANGE_Y_TO_IES':
+            plural = word[:-1] + 'ies'
+        else:
+            plural = word  # Default case (shouldn't reach here in this FSM)
+        
+        # Move to the final state after processing
+        self.current_state = 'FINAL'
+        return plural
+
+# Test the FSM for morphological parsing
+fsm = FiniteStateMachine()
+nouns = ['dog', 'bus', 'box', 'baby', 'church', 'cat', 'boy']
+
+print("Plural Forms:")
+for noun in nouns:
+    plural_form = fsm.pluralize(noun)
+    print(f"{noun} -> {plural_form}")
